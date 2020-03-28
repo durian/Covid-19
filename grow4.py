@@ -166,8 +166,10 @@ import scipy.optimize as sio
 
 def f(x, A, B):
     if args.function[0] == "e":
-        return A + np.exp(B*x)
+        # f(x) = A * B^x
+        return A * np.exp(B*x)
     else:
+        # f(x) = A * x^B
         return A * np.power(x, B) 
 
 fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(12, 8))
