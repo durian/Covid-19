@@ -15,13 +15,10 @@ from matplotlib.dates import MonthLocator, YearLocator, DateFormatter, WeekdayLo
 import matplotlib.ticker as plticker
 import matplotlib.dates as mdates
 
-# The data for this script can be found here:
+# Data:
 #   git clone https://github.com/CSSEGISandData/COVID-19.git
 
 cat20_colours = [
-    "#e6194B", "#3cb44b", "#ffe119", "#4363d8", "#f58231",
-    "#911eb4", "#42d4f4", "#f032e6", "#bfef45", "#fabebe",
-    
     "#1f77b4", "#aec7e8", "#ff7f0e", "#ffbb78", "#2ca02c",
     "#98df8a", "#d62728", "#ff9896", "#9467bd", "#c5b0d5",
     "#8c564b", "#c49c94", "#e377c2", "#f7b6d2", "#7f7f7f", 
@@ -89,16 +86,17 @@ if args.absolute:
     
 ymax = 0
 ymin = 0
-first_date = {}
-last_date  = {}
 for country in countries:
     dfc=df[ (df["Country/Region"]==country) & (df["Province/State"].isnull())  ]
     print( dfc )
-    cols = dfc.columns[-last_n:] # list with dates
+    #print( dfc.columns )
+    cols = dfc.columns[-last_n:]
     try:
         data = dfc.iloc[0,4:]
-        data = data[data>0] # What if 0 in the middle? 
-        print( "data\n", data )
+        data = data[data>0] 
+        print( "Values", dfc.iloc[0,4:].values )
+        print( "data", data )
+        print( dfc.iloc[0,4:].first_valid_index() )
     except IndexError:
         continue
     if not args.absolute:
@@ -108,17 +106,17 @@ for country in countries:
             pop = 1
     else:
         pop = 1
-    date_index = [datetime.strptime(x, '%m/%d/%y') for x in data.index]
-    data.index = date_index
-    print( date_index )
-    graphs[country] = data / pop # normalise
+    graphs[country] = dfc.iloc[0,-last_n:].values / pop
+    #graphs[country] = data / pop
     ymax = max( ymax, max(graphs[country]) )
-    first_date[country] = date_index[0]
-    last_date[country]  = date_index[-1]
-    print( first_date, min(first_date.values()), max(last_date.values()) )
 
-xlabels = pd.date_range(start=min(first_date.values()), end=max(last_date.values()))
-xcount = list( range(0, 20) )
+key0   = list(graphs.keys())[0] # need access to one of'm
+xcount = list(range( 0, len(graphs[key0]) ))
+print( xcount )
+first_date = cols[0]
+first_date_dt = datetime.strptime(first_date,'%m/%d/%y')
+print( first_date, first_date_dt )
+xlabels = [first_date_dt + pd.Timedelta('1 day')*d for d in xcount ]
 print( xlabels )
            
 fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(12, 8))
@@ -127,9 +125,9 @@ fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(12, 8))
 
 for i, g in enumerate(graphs):
     print( g )
-    ax.plot( graphs[g], label=g, c=cat20_colours[i] )
+    ax.plot( xlabels, graphs[g], label=g, c=cat20_colours[i] )
     #ax.plot( graphs[g].index, graphs[g], label=g, c=cat20_colours[i] )
-    ax.scatter( x=graphs[g].index, y=graphs[g].values, c=cat20_colours[i], alpha=0.4 )
+    #ax.scatter( xlabels, graphs[g], c=cat20_colours[i], alpha=0.4 )
 fig.autofmt_xdate()
 #ax.set_yscale("log")
 ax.set_title( title_str )
@@ -158,7 +156,7 @@ ax.legend(labelspacing=0.2, frameon=True)
 
 pngfile="covid.png"
 fig.savefig(pngfile, dpi=300)
-plt.show()
+
 #
 
 import scipy.optimize as sio
