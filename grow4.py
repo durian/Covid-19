@@ -117,10 +117,9 @@ for country in countries:
     last_date[country]  = date_index[-1]
     print( first_date, min(first_date.values()), max(last_date.values()) )
 
-xlabels = pd.date_range(start=min(first_date.values()), end=max(last_date.values()))
-xcount = list( range(0, 20) )
+xlabels = pd.date_range(start=min(first_date.values()), end=max(last_date.values()) ) #, freq='W-Mon')
 print( xlabels )
-           
+
 fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(12, 8))
 
 #print( graphs )
@@ -129,10 +128,12 @@ for i, g in enumerate(graphs):
     print( g )
     ax.plot( graphs[g], label=g, c=cat20_colours[i] )
     #ax.plot( graphs[g].index, graphs[g], label=g, c=cat20_colours[i] )
-    ax.scatter( x=graphs[g].index, y=graphs[g].values, c=cat20_colours[i], alpha=0.4 )
+    ax.scatter( x=graphs[g].index, y=graphs[g].values, c=cat20_colours[i], alpha=0.5 )
+
 fig.autofmt_xdate()
 #ax.set_yscale("log")
 ax.set_title( title_str )
+ax.set_xticklabels([], minor=True)
 ax.set_xlabel( "Data from https://github.com/CSSEGISandData/COVID-19" )
 plt.tight_layout()
 ax.grid(linestyle='-', axis="y", alpha=0.5)
@@ -158,7 +159,7 @@ ax.legend(labelspacing=0.2, frameon=True)
 
 pngfile="covid.png"
 fig.savefig(pngfile, dpi=300)
-plt.show()
+
 #
 
 import scipy.optimize as sio
@@ -171,28 +172,31 @@ def f(x, A, B):
 
 fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(12, 8))
 
-x1 = range(0, len(xcount) + 1 ) # One extra day
-x1labels = [first_date_dt + pd.Timedelta('1 day')*d for d in x1 ]
+x1 = range(0, len(xlabels) + 1 ) # One extra day
+print( xlabels[-1] + pd.Timedelta('1 day') )
+x1labels = pd.date_range(start=xlabels[0], end=xlabels[-1] + pd.Timedelta('1 day') ) 
 x1 = np.array(x1)
 
 for i, g in enumerate(graphs):
     print( g )
-    x = np.array(xcount)
-    y = np.array(graphs[g])
+    x  = np.array( graphs[g].index ) # original x-index
+    x1 = pd.date_range(start=graphs[g].index[0], end=graphs[g].index[-1] + pd.Timedelta('1 day') )  # plus one day
+    y  = np.array( graphs[g].values ) # original y-values
     print( x, y[0] )
-    coeffs, coeffs_cov = sio.curve_fit(f, x, y, p0=(0, 1), bounds=(0, +np.inf) )
+    xr = np.array( range( 0, len(x) ) ) # integer range over days
+    coeffs, coeffs_cov = sio.curve_fit(f, xr, y, p0=(0, 1), bounds=(0, +np.inf), maxfev=1000 )
     print( coeffs )
     print( coeffs_cov )
     # original data
-    ax.scatter(xlabels, y, c=cat20_colours[i], label=g)
-    #ax.plot(xlabels, y, c=cat20_colours[i], linewidth=1, label=g) # labels/range from above
+    ax.scatter( x=graphs[g].index, y=graphs[g].values, c=cat20_colours[i], alpha=0.5, label=g )
     #
-    pred_y = f(x1, *coeffs)
+    xr1 = range( 0, len(x)+1 ) # integerr ange for one day extra
+    pred_y = f(xr1, *coeffs)   # predict
     print( y )
     print( pred_y )
     cf = ["{:.2f}".format(cf) for cf in coeffs]
-    # interpolated data
-    ax.plot(x1labels, (f(x1, *coeffs)), c=cat20_colours[i], linewidth=2, label=cf) #extrapolated labels/range
+    # plot interpolated data
+    ax.plot( x1, (f(xr1, *coeffs)), c=cat20_colours[i], linewidth=2, label=cf) #extrapolated labels/range
     #ax.set_yscale("log")
 fig.autofmt_xdate()
 ax.set_title( title_str )
