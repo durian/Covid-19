@@ -205,7 +205,10 @@ fig.autofmt_xdate()
 ax.set_title( title_str )
 ax.set_xlabel( "Data from https://github.com/CSSEGISandData/COVID-19" )
 ax.grid(linestyle='-', alpha=0.5) #, axis="y"
-days = mdates.DayLocator()
+if len( x1labels ) < 22:
+    days = mdates.DayLocator()
+else:
+    days = mdates.WeekLocator()
 ax.xaxis.set_major_locator(days)
 ax.legend(labelspacing=0.2, frameon=True)
 plt.tight_layout()
