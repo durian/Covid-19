@@ -208,10 +208,11 @@ for i, g in enumerate(graphs):
     #ax.hlines( pred_y[-1], x1[0], x1[-1] )
     if args.absolute:
         ax.annotate(str(int(pred_y[-1])), (x1[-1], pred_y[-1]),
-                    xytext=(-8, +4), textcoords='offset points')
+                    # https://jakevdp.github.io/PythonDataScienceHandbook/04.09-text-and-annotation.html
+                    xytext=(0, +4), textcoords='offset points', ha='center', c=cat20_colours[i])
     else:
         ax.annotate(str(int(pred_y[-1]*population[g])), (x1[-1], pred_y[-1]),
-                    xytext=(-8, +4), textcoords='offset points')
+                    xytext=(0, +4), textcoords='offset points', ha='center', c=cat20_colours[i])
 fig.autofmt_xdate()
 ax.set_title( title_str )
 ax.set_xlabel( "Data from https://github.com/CSSEGISandData/COVID-19" )
