@@ -40,6 +40,7 @@ parser.add_argument( '-c', '--countries', type=str, default="Sweden,Netherlands"
 parser.add_argument( '-f', '--function', type=str, default="exp", help='Which function to fit (power, exponential)')
 parser.add_argument( '-g', '--graph', type=str, default="confirmed", help='Which data set (confirmed, deaths)')
 parser.add_argument( '-l', "--last_n", type=int, default=28, help='Last n days' )
+parser.add_argument( '-L', "--log", action='store_true', default=False, help='Logarithmic y-axis' )
 parser.add_argument( '-m', "--minimum", type=int, default=0, help='Use only data > minimum' )
 parser.add_argument( '-p', "--predict", type=int, default=1, help='Number of days to predict' ) 
 args = parser.parse_args()
@@ -133,7 +134,8 @@ for i, g in enumerate(graphs):
     ax.scatter( x=graphs[g].index, y=graphs[g].values, c=cat20_colours[i], alpha=0.5 )
 
 fig.autofmt_xdate()
-#ax.set_yscale("log")
+if args.log:
+    ax.set_yscale("log")
 ax.set_title( title_str )
 ax.set_xticklabels([], minor=True)
 ax.set_xlabel( "Data from https://github.com/CSSEGISandData/COVID-19" )
@@ -151,8 +153,9 @@ elif yrange > 10:
 else:
     yinc = 1
 print( yrange, yinc )
-loc = plticker.MultipleLocator(base=yinc) # this locator puts ticks at regular intervals
-ax.yaxis.set_major_locator(loc)
+if not args.log:
+    loc = plticker.MultipleLocator(base=yinc) # this locator puts ticks at regular intervals
+    ax.yaxis.set_major_locator(loc)
 if len( xlabels ) < 22:
     days = mdates.DayLocator()
 else:
@@ -214,6 +217,8 @@ for i, g in enumerate(graphs):
         ax.annotate(str(int(pred_y[-1]*population[g])), (x1[-1], pred_y[-1]),
                     xytext=(0, +4), textcoords='offset points', ha='center', c=cat20_colours[i])
 fig.autofmt_xdate()
+if args.log:
+    ax.set_yscale("log")
 ax.set_title( title_str )
 ax.set_xlabel( "Data from https://github.com/CSSEGISandData/COVID-19" )
 ax.grid(linestyle='-', alpha=0.5) #, axis="y"
