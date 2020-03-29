@@ -97,7 +97,7 @@ for country in countries:
     print( dfc )
     try:
         data = dfc.iloc[0,4:]
-        #data = data[-args.last_n:]
+        data = data[-args.last_n:]
         data = data[data>args.minimum] # What if 0 in the middle? 
         print( "data\n", data )
     except IndexError:
@@ -152,8 +152,12 @@ else:
 print( yrange, yinc )
 loc = plticker.MultipleLocator(base=yinc) # this locator puts ticks at regular intervals
 ax.yaxis.set_major_locator(loc)
-days = mdates.DayLocator()
+if len( xlabels ) < 22:
+    days = mdates.DayLocator()
+else:
+    days = mdates.WeekdayLocator(byweekday=(0))
 ax.xaxis.set_major_locator(days)
+ax.xaxis.set_minor_locator(mdates.DayLocator())
 
 #ax.legend(fontsize='x-small', labelspacing=0.2, frameon=True)
 ax.legend(labelspacing=0.2, frameon=True)
@@ -208,8 +212,9 @@ ax.grid(linestyle='-', alpha=0.5) #, axis="y"
 if len( x1labels ) < 22:
     days = mdates.DayLocator()
 else:
-    days = mdates.WeekLocator()
+    days = mdates.WeekdayLocator(byweekday=(0))
 ax.xaxis.set_major_locator(days)
+ax.xaxis.set_minor_locator(mdates.DayLocator())
 ax.legend(labelspacing=0.2, frameon=True)
 plt.tight_layout()
 pngfile="covid_pred.png"
