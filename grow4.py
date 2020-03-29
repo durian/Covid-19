@@ -203,8 +203,10 @@ for i, g in enumerate(graphs):
     print( pred_y )
     cf = ["{:.2f}".format(cf) for cf in coeffs]
     # plot interpolated data
-    ax.plot( x1, (f(xr1, *coeffs)), c=cat20_colours[i], linewidth=2, label=cf) #extrapolated labels/range
-    #ax.set_yscale("log")
+    ax.plot( x1, pred_y, c=cat20_colours[i], linewidth=2, label=cf) #extrapolated labels/range
+    #ax.stem( [x1[-1]], [pred_y[-1]] )
+    #ax.hlines( pred_y[-1], x1[0], x1[-1] )
+    ax.annotate(str(int(pred_y[-1])), (x1[-1], pred_y[-1]))
 fig.autofmt_xdate()
 ax.set_title( title_str )
 ax.set_xlabel( "Data from https://github.com/CSSEGISandData/COVID-19" )
