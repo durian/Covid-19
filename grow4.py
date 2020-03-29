@@ -39,7 +39,8 @@ parser.add_argument( '-A', "--all", action='store_true', default=False, help='Al
 parser.add_argument( '-c', '--countries', type=str, default="Sweden,Netherlands", help='Countries')
 parser.add_argument( '-f', '--function', type=str, default="power", help='Which function to fit (power, exponential)')
 parser.add_argument( '-g', '--graph', type=str, default="confirmed", help='Which data set (confirmed, deaths)')
-parser.add_argument( '-l', "--last_n", type=int, default=28, help='Last n days' ) 
+parser.add_argument( '-l', "--last_n", type=int, default=28, help='Last n days' )
+parser.add_argument( '-m', "--minimum", type=int, default=0, help='Use only data > minimum' ) 
 args = parser.parse_args()
 
 #fn = "./COVID-19/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Confirmed.csv"
@@ -94,10 +95,10 @@ last_date  = {}
 for country in countries:
     dfc=df[ (df["Country/Region"]==country) & (df["Province/State"].isnull())  ]
     print( dfc )
-    cols = dfc.columns[-last_n:] # list with dates
     try:
         data = dfc.iloc[0,4:]
-        data = data[data>0] # What if 0 in the middle? 
+        #data = data[-args.last_n:]
+        data = data[data>args.minimum] # What if 0 in the middle? 
         print( "data\n", data )
     except IndexError:
         continue
@@ -110,7 +111,7 @@ for country in countries:
         pop = 1
     date_index = [datetime.strptime(x, '%m/%d/%y') for x in data.index]
     data.index = date_index
-    print( date_index )
+    #print( date_index )
     graphs[country] = data / pop # normalise
     ymax = max( ymax, max(graphs[country]) )
     first_date[country] = date_index[0]
