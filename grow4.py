@@ -40,7 +40,8 @@ parser.add_argument( '-c', '--countries', type=str, default="Sweden,Netherlands"
 parser.add_argument( '-f', '--function', type=str, default="power", help='Which function to fit (power, exponential)')
 parser.add_argument( '-g', '--graph', type=str, default="confirmed", help='Which data set (confirmed, deaths)')
 parser.add_argument( '-l', "--last_n", type=int, default=28, help='Last n days' )
-parser.add_argument( '-m', "--minimum", type=int, default=0, help='Use only data > minimum' ) 
+parser.add_argument( '-m', "--minimum", type=int, default=0, help='Use only data > minimum' )
+parser.add_argument( '-p', "--predict", type=int, default=1, help='Number of days to predict' ) 
 args = parser.parse_args()
 
 #fn = "./COVID-19/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Confirmed.csv"
@@ -165,7 +166,7 @@ ax.legend(labelspacing=0.2, frameon=True)
 pngfile="covid.png"
 fig.savefig(pngfile, dpi=300)
 
-#
+# Fit and extrapolate
 
 import scipy.optimize as sio
 
@@ -179,15 +180,14 @@ def f(x, A, B):
 
 fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(12, 8))
 
-x1 = range(0, len(xlabels) + 1 ) # One extra day
-print( xlabels[-1] + pd.Timedelta('1 day') )
-x1labels = pd.date_range(start=xlabels[0], end=xlabels[-1] + pd.Timedelta('1 day') ) 
+x1 = range(0, len(xlabels) + args.predict ) # 'p' extra days
+x1labels = pd.date_range(start=xlabels[0], end=xlabels[-1] + pd.Timedelta(str(args.predict)+' day') ) 
 x1 = np.array(x1)
 
 for i, g in enumerate(graphs):
     print( g )
     x  = np.array( graphs[g].index ) # original x-index
-    x1 = pd.date_range(start=graphs[g].index[0], end=graphs[g].index[-1] + pd.Timedelta('1 day') )  # plus one day
+    x1 = pd.date_range(start=graphs[g].index[0], end=graphs[g].index[-1] + pd.Timedelta(str(args.predict)+'day') ) 
     y  = np.array( graphs[g].values ) # original y-values
     print( x, y[0] )
     xr = np.array( range( 0, len(x) ) ) # integer range over days
@@ -197,7 +197,7 @@ for i, g in enumerate(graphs):
     # original data
     ax.scatter( x=graphs[g].index, y=graphs[g].values, c=cat20_colours[i], alpha=0.5, label=g )
     #
-    xr1 = range( 0, len(x)+1 ) # integerr ange for one day extra
+    xr1 = range( 0, len(x)+args.predict ) # integer r ange for days extra
     pred_y = f(xr1, *coeffs)   # predict
     print( y )
     print( pred_y )
