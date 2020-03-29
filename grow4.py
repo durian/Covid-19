@@ -37,7 +37,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument( '-a', "--absolute", action='store_true', default=False, help='Do not normalise' )
 parser.add_argument( '-A', "--all", action='store_true', default=False, help='All countries with populations' )
 parser.add_argument( '-c', '--countries', type=str, default="Sweden,Netherlands", help='Countries')
-parser.add_argument( '-f', '--function', type=str, default="power", help='Which function to fit (power, exponential)')
+parser.add_argument( '-f', '--function', type=str, default="exp", help='Which function to fit (power, exponential)')
 parser.add_argument( '-g', '--graph', type=str, default="confirmed", help='Which data set (confirmed, deaths)')
 parser.add_argument( '-l', "--last_n", type=int, default=28, help='Last n days' )
 parser.add_argument( '-m', "--minimum", type=int, default=0, help='Use only data > minimum' )
@@ -201,12 +201,17 @@ for i, g in enumerate(graphs):
     pred_y = f(xr1, *coeffs)   # predict
     print( y )
     print( pred_y )
-    cf = ["{:.2f}".format(cf) for cf in coeffs]
-    # plot interpolated data
+    cf = ["{:.2f}".format(cf) for cf in coeffs] # A and B
+    # plot interpolated data label=r'$\sin (x)$'
     ax.plot( x1, pred_y, c=cat20_colours[i], linewidth=2, label=cf) #extrapolated labels/range
     #ax.stem( [x1[-1]], [pred_y[-1]] )
     #ax.hlines( pred_y[-1], x1[0], x1[-1] )
-    ax.annotate(str(int(pred_y[-1])), (x1[-1], pred_y[-1]))
+    if args.absolute:
+        ax.annotate(str(int(pred_y[-1])), (x1[-1], pred_y[-1]),
+                    xytext=(-8, +4), textcoords='offset points')
+    else:
+        ax.annotate(str(int(pred_y[-1]*population[g])), (x1[-1], pred_y[-1]),
+                    xytext=(-8, +4), textcoords='offset points')
 fig.autofmt_xdate()
 ax.set_title( title_str )
 ax.set_xlabel( "Data from https://github.com/CSSEGISandData/COVID-19" )
