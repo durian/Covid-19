@@ -13,10 +13,10 @@ from matplotlib import cm
 import numpy as np
 from matplotlib.dates import MonthLocator, YearLocator, DateFormatter, WeekdayLocator
 
-fn = "COVID-19-geographic-disbtribution-worldwide.csv"
+fn = "COVID-19-geographic-disbtribution-worldwide-2020-03-30.csv"
 df = pd.read_csv( fn, sep="," )
 #df['DateRep'] = df['DateRep'].apply(lambda x: dt.datetime.strptime(x,'%d/%m/%Y'))
-df.loc[:,'DateRep'] = pd.to_datetime(df['DateRep']) #, format='%d/%m/%Y')
+df.loc[:,'dateRep'] = pd.to_datetime(df['dateRep']) #, format='%d/%m/%Y')
 print( df )
 
 populations = { }
@@ -35,21 +35,21 @@ dfs = {}
 if False:
     c = "EU" # Hardcoded EU
     dfs[c] = df[ df["EU"] == "EU" ]
-    #dfs[c] = dfs[c][ dfs[c]["DateRep"] > "2020-02-12" ]
-    dfs[c].sort_values( by=['DateRep'], inplace=True )
-    #dfs[c].loc[:, 'Sum']     = dfs[c]['NewConfCases'].cumsum()
-    dfs[c].loc[:, 'Sum']     = dfs[c]['Cases'].cumsum()
+    #dfs[c] = dfs[c][ dfs[c]["dateRep"] > "2020-02-12" ]
+    dfs[c].sort_values( by=['dateRep'], inplace=True )
+    #dfs[c].loc[:, 'Sum']     = dfs[c]['NewConfcases'].cumsum()
+    dfs[c].loc[:, 'Sum']     = dfs[c]['cases'].cumsum()
     dfs[c].loc[:, 'SumNorm'] = dfs[c]['Sum'] / 1000
     print( dfs[c] )
 
 for c in ["SE", "NL", "NO", "DK"]:
     if not c in populations:
         populations[c] = 1000
-    dfs[c] = df[ df["GeoId"] == c ]
-    #dfs[c] = dfs[c][ dfs[c]["DateRep"] > "2020-02-12" ]
-    dfs[c].sort_values( by=['DateRep'], inplace=True )
-    #dfs[c].loc[:, 'Sum']     = dfs[c]['NewConfCases'].cumsum()
-    dfs[c].loc[:, 'Sum']     = dfs[c]['Cases'].cumsum()
+    dfs[c] = df[ df["geoId"] == c ]
+    #dfs[c] = dfs[c][ dfs[c]["dateRep"] > "2020-02-12" ]
+    dfs[c].sort_values( by=['dateRep'], inplace=True )
+    #dfs[c].loc[:, 'Sum']     = dfs[c]['NewConfcases'].cumsum()
+    dfs[c].loc[:, 'Sum']     = dfs[c]['cases'].cumsum()
     dfs[c].loc[:, 'SumNorm'] = dfs[c]['Sum'] / populations[c]
     print( dfs[c] )
     print( dfs[c]["Sum"].values )
@@ -57,8 +57,8 @@ for c in ["SE", "NL", "NO", "DK"]:
 fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(12, 8))
 for c in dfs:
     print( c )
-    #ax.plot( df_SE["DateRep"], df_SE["NewConfCases"], label="SE new" )
-    ax.plot( dfs[c]["DateRep"], dfs[c]["SumNorm"], label=c )
+    #ax.plot( df_SE["dateRep"], df_SE["NewConfcases"], label="SE new" )
+    ax.plot( dfs[c]["dateRep"], dfs[c]["SumNorm"], label=c )
 
 ax.xaxis.set_major_formatter( DateFormatter('%Y-%m-%d') )
 ax.xaxis.set_minor_locator( WeekdayLocator() )
@@ -70,8 +70,8 @@ plt.show(block=True)
 
 fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(12, 8))
 for i, c in enumerate(["SE", "NL"]): #, "NO", "DK", "DE", "BE"]:
-    dfs[c] = dfs[c][ dfs[c]["DateRep"] >= "2020-03-01" ]
-    rects = ax.bar( dfs[c]["DateRep"] + i*pd.Timedelta('6 hours'),
+    dfs[c] = dfs[c][ dfs[c]["dateRep"] >= "2020-03-01" ]
+    rects = ax.bar( dfs[c]["dateRep"] + i*pd.Timedelta('6 hours'),
                     dfs[c]["Sum"],
                     alpha=0.8,
                     #width=0.5,

@@ -17,6 +17,8 @@ import matplotlib.dates as mdates
 
 # The data for this script can be found here:
 #   git clone https://github.com/CSSEGISandData/COVID-19.git
+#
+# cd COVID-19;git pull; cd ..
 
 cat20_colours = [
     "#e6194B", "#3cb44b", "#ffe119", "#4363d8", "#f58231",
@@ -79,6 +81,7 @@ population["Italy"]       =  60.488377
 population["Iceland"]     =   0.340596
 population["Spain"]       =  46.749597
 population["US"]          = 330.488824
+population["Finland"]     =   5.540720
 
 #countries = ["Netherlands", "Sweden", "Denmark", "Norway", "Germany", "Belgium", "Iran", "Italy"]
 if args.all:
